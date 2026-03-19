@@ -1,17 +1,13 @@
 # Replit Configuration for WhatsApp Multi-Account Warmer
-# Simplified version without Nix
 
-# Use Node.js template
 run = "bash start_replit.sh"
 
-# Environment variables
 [env]
 NODE_ENV = "production"
 HOSTNAME = "0.0.0.0"
 PORT = "3000"
 WHATSAPP_SERVICE_PORT = "3030"
 
-# Port configuration
 [[ports]]
 port = 3000
 name = "Next.js"
@@ -20,5 +16,4 @@ name = "Next.js"
 port = 3030
 name = "WhatsApp Service"
 
-# Hide unnecessary files
 hidden = ["node_modules", ".next", ".git", "sessions", "backups", "data"]
