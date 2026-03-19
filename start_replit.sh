@@ -6,6 +6,9 @@ echo "🚀 Starting WhatsApp Warmer..."
 # Create directories
 mkdir -p data sessions backups logs
 
+# Set environment
+export DATABASE_URL="file:$PWD/data/whatsapp.db"
+
 # Install dependencies if needed
 if [ ! -d "node_modules" ]; then
     echo "📦 Installing dependencies..."
@@ -37,14 +40,17 @@ cd mini-services/whatsapp-service
 node index.js > ../../logs/whatsapp.log 2>&1 &
 cd ../..
 
+# Wait for WhatsApp service
+sleep 3
+
 # Start Next.js
+echo "Starting Next.js on port 3000..."
 npm run start > logs/nextjs.log 2>&1 &
 
 echo ""
 echo "✅ Services started!"
-echo "📊 Next.js: http://localhost:3000"
-echo "📊 WhatsApp: http://localhost:3030"
+echo "📊 Open the webview to see the app"
 echo ""
 
-# Keep running
-wait
+# Keep running - show WhatsApp logs
+tail -f logs/whatsapp.log logs/nextjs.log 2>/dev/null || sleep infinity

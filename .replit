@@ -9,11 +9,7 @@ PORT = "3000"
 WHATSAPP_SERVICE_PORT = "3030"
 
 [[ports]]
-port = 3000
-name = "Next.js"
+internalPort = 3000
 
 [[ports]]
-port = 3030
-name = "WhatsApp Service"
-
-hidden = ["node_modules", ".next", ".git", "sessions", "backups", "data"]
+internalPort = 3030
