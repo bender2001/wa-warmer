@@ -1,15 +1,1 @@
-# Replit Configuration for WhatsApp Multi-Account Warmer
-
 run = "bash start_replit.sh"
-
-[env]
-NODE_ENV = "production"
-HOSTNAME = "0.0.0.0"
-PORT = "3000"
-WHATSAPP_SERVICE_PORT = "3030"
-
-[[ports]]
-internalPort = 3000
-
-[[ports]]
-internalPort = 3030
