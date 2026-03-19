@@ -1,0 +1,41 @@
+:81 {
+	# Disable trailing slash redirect for socket.io
+	@socketio path /socket.io*
+	
+	# Handle socket.io requests with XTransformPort
+	@socketio_port {
+		path /socket.io*
+		query XTransformPort=*
+	}
+	handle @socketio_port {
+		reverse_proxy localhost:{query.XTransformPort} {
+			header_up Host {host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+			header_up X-Real-IP {remote_host}
+		}
+	}
+
+	# Handle other requests with XTransformPort
+	@transform_port_query {
+		query XTransformPort=*
+	}
+	handle @transform_port_query {
+		reverse_proxy localhost:{query.XTransformPort} {
+			header_up Host {host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+			header_up X-Real-IP {remote_host}
+		}
+	}
+
+	# Default to Next.js
+	handle {
+		reverse_proxy localhost:3000 {
+			header_up Host {host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+			header_up X-Real-IP {remote_host}
+		}
+	}
+}

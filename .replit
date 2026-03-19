@@ -1,0 +1,54 @@
+# Replit Configuration for WhatsApp Multi-Account Warmer
+# This file configures how Replit runs the project
+
+# Entry point - start script
+entrypoint = "start_replit.sh"
+
+# Run command
+run = "bash start_replit.sh"
+
+# Hidden files to show in file tree
+hidden = ["node_modules", ".next", ".git", "sessions", "backups", "data"]
+
+# Ports to expose
+# Replit will automatically detect ports, but we can hint
+[nix]
+channel = "stable-22_11"
+
+[env]
+NODE_ENV = "production"
+HOSTNAME = "0.0.0.0"
+PORT = "3000"
+WHATSAPP_SERVICE_PORT = "3030"
+DATABASE_URL = "file:/home/runner/$REPL_SLUG/data/whatsapp.db"
+
+# Unit configuration for the run button
+[[units]]
+name = "Start All Services"
+command = "bash start_replit.sh"
+
+[[ports]]
+localPort = 3000
+externalPort = 443
+
+[[ports]]
+localPort = 3030
+externalPort = 443
+
+# Language configuration
+[languages]
+javascript = "npm"
+typescript = "npm"
+
+# Packager configuration
+[packager]
+language = "nodejs"
+
+[packager.features]
+packageSearch = true
+guessImports = true
+enabledFor = ["nodejs", "javascript", "typescript"]
+
+# Workload configuration
+[workload]
+available = true
