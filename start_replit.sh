@@ -1,6 +1,6 @@
 #!/bin/bash
 # Replit Start Script for WhatsApp Multi-Account Warmer
-# This script sets up and runs both services
+# Compatible with Replit's Node.js template
 
 echo "=========================================="
 echo "🚀 Starting WhatsApp Warmer on Replit..."
@@ -11,28 +11,25 @@ export NODE_ENV=production
 export HOSTNAME=0.0.0.0
 export PORT=3000
 export WHATSAPP_SERVICE_PORT=3030
-export DATABASE_URL="file:$HOME/data/whatsapp.db"
-
-# Replit specific
 export REPLIT=true
 
+# Get home directory
+HOME_DIR=$(pwd)
+export DATABASE_URL="file:$HOME_DIR/data/whatsapp.db"
+
 # Create necessary directories
-mkdir -p $HOME/data
-mkdir -p $HOME/sessions
-mkdir -p $HOME/backups
-mkdir -p $HOME/logs
+mkdir -p $HOME_DIR/data
+mkdir -p $HOME_DIR/sessions
+mkdir -p $HOME_DIR/backups
+mkdir -p $HOME_DIR/logs
 
-# Set working directory
-cd $HOME
+echo "📁 Working directory: $HOME_DIR"
 
-# Check if we're in the project directory
+# Check if package.json exists
 if [ ! -f "package.json" ]; then
     echo "❌ Error: package.json not found!"
-    echo "Make sure you imported the correct GitHub repository"
     exit 1
 fi
-
-echo "📁 Working directory: $(pwd)"
 
 # ============================================
 # INSTALL DEPENDENCIES
@@ -40,16 +37,16 @@ echo "📁 Working directory: $(pwd)"
 echo ""
 echo "📦 Installing dependencies..."
 
-# Check if node_modules exists
+# Install main dependencies
 if [ ! -d "node_modules" ]; then
-    echo "Installing main dependencies with Bun..."
-    bun install
+    echo "Installing main dependencies..."
+    npm install
 fi
 
 # Install WhatsApp service dependencies
 if [ -d "mini-services/whatsapp-service" ]; then
     if [ ! -d "mini-services/whatsapp-service/node_modules" ]; then
-        echo "Installing WhatsApp service dependencies with npm..."
+        echo "Installing WhatsApp service dependencies..."
         cd mini-services/whatsapp-service
         npm install
         cd ../..
@@ -62,9 +59,11 @@ fi
 echo ""
 echo "🗄️ Setting up database..."
 
-# Generate Prisma client and push schema
-bunx prisma generate
-bunx prisma db push --skip-generate
+# Generate Prisma client
+npx prisma generate
+
+# Push schema to database
+npx prisma db push --skip-generate
 
 echo "✅ Database ready"
 
@@ -75,7 +74,7 @@ echo ""
 echo "🔨 Building Next.js application..."
 
 if [ ! -d ".next" ]; then
-    bun run build
+    npm run build
 fi
 
 echo "✅ Build complete"
@@ -88,8 +87,8 @@ echo "🚀 Starting services..."
 echo "=========================================="
 
 # Create log files
-NEXTJS_LOG="$HOME/logs/nextjs.log"
-WHATSAPP_LOG="$HOME/logs/whatsapp.log"
+NEXTJS_LOG="$HOME_DIR/logs/nextjs.log"
+WHATSAPP_LOG="$HOME_DIR/logs/whatsapp.log"
 
 # Function to handle shutdown
 cleanup() {
@@ -105,12 +104,12 @@ trap cleanup SIGINT SIGTERM
 # Start WhatsApp Service (background)
 echo "Starting WhatsApp service on port $WHATSAPP_SERVICE_PORT..."
 cd mini-services/whatsapp-service
-node --experimental-modules index.js > $WHATSAPP_LOG 2>&1 &
+node index.js > $WHATSAPP_LOG 2>&1 &
 WHATSAPP_PID=$!
 cd ../..
 
 # Wait a bit for WhatsApp service to start
-sleep 3
+sleep 5
 
 # Check if WhatsApp service is running
 if kill -0 $WHATSAPP_PID 2>/dev/null; then
@@ -118,16 +117,16 @@ if kill -0 $WHATSAPP_PID 2>/dev/null; then
 else
     echo "⚠️ WhatsApp service may have failed to start. Check logs."
     echo "Last 10 lines of WhatsApp log:"
-    tail -10 $WHATSAPP_LOG
+    tail -10 $WHATSAPP_LOG 2>/dev/null || echo "No log file yet"
 fi
 
-# Start Next.js (foreground - this is the main service Replit exposes)
+# Start Next.js (foreground)
 echo "Starting Next.js on port $PORT..."
-bun run start > $NEXTJS_LOG 2>&1 &
+npm run start > $NEXTJS_LOG 2>&1 &
 NEXTJS_PID=$!
 
 # Wait a bit for Next.js to start
-sleep 3
+sleep 5
 
 # Check if Next.js is running
 if kill -0 $NEXTJS_PID 2>/dev/null; then
@@ -135,7 +134,7 @@ if kill -0 $NEXTJS_PID 2>/dev/null; then
 else
     echo "⚠️ Next.js may have failed to start. Check logs."
     echo "Last 10 lines of Next.js log:"
-    tail -10 $NEXTJS_LOG
+    tail -10 $NEXTJS_LOG 2>/dev/null || echo "No log file yet"
 fi
 
 echo ""
@@ -147,17 +146,10 @@ echo "📊 Service Status:"
 echo "   - Next.js:      http://localhost:$PORT"
 echo "   - WhatsApp API: http://localhost:$WHATSAPP_SERVICE_PORT"
 echo ""
-echo "📝 Logs:"
-echo "   - Next.js:  $NEXTJS_LOG"
-echo "   - WhatsApp: $WHATSAPP_LOG"
-echo ""
-echo "💡 Tips:"
-echo "   - View Next.js logs:  tail -f $NEXTJS_LOG"
-echo "   - View WhatsApp logs: tail -f $WHATSAPP_LOG"
-echo "   - View all logs:      tail -f $NEXTJS_LOG $WHATSAPP_LOG"
+echo "📝 Logs location: $HOME_DIR/logs/"
 echo ""
 echo "🔄 Keep-alive: Use UptimeRobot to ping this repl every 5 minutes"
 echo ""
 
-# Keep the script running and show logs
+# Keep the script running
 wait $NEXTJS_PID $WHATSAPP_PID
