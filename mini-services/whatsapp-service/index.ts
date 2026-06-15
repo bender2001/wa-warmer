@@ -180,7 +180,7 @@ interface Message {
   isAutoResponse?: boolean;
 }
 
-// Silent period - akun "istirahat" tanpa aktivitas
+// Silent period - account "resting" with no activity
 interface SilentPeriod {
   isActive: boolean;
   startedAt?: Date;
@@ -284,7 +284,7 @@ const CONNECTING_TIMEOUT_MS = 120000; // 2 minutes timeout for QR/Pairing
 // ZAI instance removed
 
 // ==================== GROQ AI BACKUP ====================
-// Groq AI untuk generate response
+// Groq AI for generating responses
 let groqInstance: Groq | null = null;
 
 // Fallback responses when all AI fails
@@ -379,75 +379,75 @@ const pendingDeletion: Set<string> = new Set();
 const personalityRegistry: Map<string, Personality> = new Map();
 
 // ==================== SAFE MODE CONFIGURATION ====================
-// Safe Mode: Mengurangi risiko banned dengan intensitas sangat rendah
+// Safe Mode: Reduces ban risk with very low intensity
 
 const SAFE_MODE_CONFIG = {
-  // Safe Mode enabled by default untuk menghindari ban
+  // Safe Mode enabled by default to avoid bans
   enabled: true,
 
-  // Batas maksimal akun yang ONLINE bersamaan
-  // DIANJURKAN: 5-10 untuk testing, bisa dinaikkan setelah 1 minggu aman
-  maxConcurrentOnline: 5, // DITURUNKAN dari 10
+  // Maximum number of accounts ONLINE at the same time
+  // RECOMMENDED: 5-10 for testing, can be raised after 1 safe week
+  maxConcurrentOnline: 5, // LOWERED from 10
 
-  // Silent period (akun "istirahat" tanpa aktivitas)
+  // Silent period (account "resting" with no activity)
   silentPeriodEnabled: true,
-  silentPeriodMinMinutes: 60, // DINAIKKAN dari 30
-  silentPeriodMaxMinutes: 240, // DINAIKKAN dari 180 (1-4 jam diam)
+  silentPeriodMinMinutes: 60, // RAISED from 30
+  silentPeriodMaxMinutes: 240, // RAISED from 180 (1-4 hours idle)
 
-  // Probability untuk tidak merespon (seperti manusia sibuk)
-  ignoreMessageChance: 0.4, // DINAIKKAN dari 0.3 (40% tidak merespon)
+  // Probability of not responding (like a busy human)
+  ignoreMessageChance: 0.4, // RAISED from 0.3 (40% no response)
 
-  // Delay lebih panjang dan random
-  responseDelayMinMinutes: 10, // DINAIKKAN dari 5
-  responseDelayMaxMinutes: 120, // DINAIKKAN dari 60 (10 menit - 2 jam)
+  // Longer and more random delay
+  responseDelayMinMinutes: 10, // RAISED from 5
+  responseDelayMaxMinutes: 120, // RAISED from 60 (10 minutes - 2 hours)
 
   // Activity burst limits
-  maxActivityMinutesPerSession: 20, // DITURUNKAN dari 30
-  minRestMinutesBetweenSessions: 90, // DINAIKKAN dari 60 (1.5 jam istirahat)
+  maxActivityMinutesPerSession: 20, // LOWERED from 30
+  minRestMinutesBetweenSessions: 90, // RAISED from 60 (1.5 hours rest)
 };
 
 let rotationTimer: NodeJS.Timeout | null = null;
 let backupTimer: NodeJS.Timeout | null = null;
 
-// Default config with SAFE MODE settings (intensitas rendah)
+// Default config with SAFE MODE settings (low intensity)
 let config: Config = {
   warmerEnabled: true,
-  warmerDelayMin: 600000,  // 10 menit minimum (dari 3 menit)
-  warmerDelayMax: 1800000, // 30 menit maximum (dari 7 menit)
+  warmerDelayMin: 600000,  // 10 minutes minimum (from 3 minutes)
+  warmerDelayMax: 1800000, // 30 minutes maximum (from 7 minutes)
   autoPresenceUpdate: true,
-  presenceUpdateInterval: 60, // 60 menit (dari 30 menit)
-  typingSimulationEnabled: false, // DIMATIKAN - berisiko terdeteksi
+  presenceUpdateInterval: 60, // 60 minutes (from 30 minutes)
+  typingSimulationEnabled: false, // DISABLED - risk of being detected
   readReceiptsEnabled: true,
   aiSystemPrompt: `You are a friendly and laid-back person.
 Reply to messages in a natural WhatsApp chat style, keep it short (1-2 sentences), and sometimes use emoji.
 Don't sound like a bot or an AI. Use casual language like "how's it going", "alright", "btw", etc.
 IMPORTANT: Don't reply too quickly. Don't be too active. Sometimes there's no need to reply at all.`,
-  warmingIntensity: 'low', // DITURUNKAN dari medium
-  activePoolSize: 10, // DITURUNKAN dari 25
-  idlePoolSize: 20, // DITURUNKAN dari 35
-  rotationIntervalMin: 60 * 60 * 1000, // 1 jam (dari 15 menit)
-  rotationIntervalMax: 120 * 60 * 1000, // 2 jam (dari 30 menit)
-  chatSimulationEnabled: true, // AKTIF - tapi dengan aturan anti-spam
+  warmingIntensity: 'low', // LOWERED from medium
+  activePoolSize: 10, // LOWERED from 25
+  idlePoolSize: 20, // LOWERED from 35
+  rotationIntervalMin: 60 * 60 * 1000, // 1 hour (from 15 minutes)
+  rotationIntervalMax: 120 * 60 * 1000, // 2 hours (from 30 minutes)
+  chatSimulationEnabled: true, // ENABLED - but with anti-spam rules
   // Conversation decay (natural ending)
-  maxSilenceCount: 2, // DITURUNKAN dari 3 - lebih cepat ending
+  maxSilenceCount: 2, // LOWERED from 3 - ends faster
   conversationDecayEnabled: true,
   // Anti-detection features
   readReceiptRandomEnabled: true,
-  readReceiptInstantChance: 30, // DITURUNKAN dari 50% - lebih jarang instant
-  readReceiptDelayChance: 40, // DINAIKKAN - lebih sering delay
-  readReceiptIgnoreChance: 30, // DINAIKKAN dari 15% - lebih sering ignore
+  readReceiptInstantChance: 30, // LOWERED from 50% - less often instant
+  readReceiptDelayChance: 40, // RAISED - more often delayed
+  readReceiptIgnoreChance: 30, // RAISED from 15% - more often ignored
   randomOfflineEnabled: true,
-  minOnlineHours: 1, // DITURUNKAN dari 2 jam
-  maxOnlineHours: 4, // DITURUNKAN dari 6 jam
-  minOfflineMinutes: 30, // DINAIKKAN dari 10 menit
-  maxOfflineMinutes: 240, // DINAIKKAN dari 120 menit (4 jam)
+  minOnlineHours: 1, // LOWERED from 2 hours
+  maxOnlineHours: 4, // LOWERED from 6 hours
+  minOfflineMinutes: 30, // RAISED from 10 minutes
+  maxOfflineMinutes: 240, // RAISED from 120 minutes (4 hours)
   burstPreventionEnabled: true,
-  minDelayBetweenMessages: 120000, // 2 menit (dari 30 detik)
-  maxMessagesPerBurst: 2, // DITURUNKAN dari 3
+  minDelayBetweenMessages: 120000, // 2 minutes (from 30 seconds)
+  maxMessagesPerBurst: 2, // LOWERED from 3
   // Rate limiting - SAFE MODE
   rateLimitEnabled: true,
-  maxMessagesPerHour: 5, // DITURUNKAN DRAMATIS dari 15
-  maxMessagesPerDay: 30, // DITURUNKAN DRAMATIS dari 100
+  maxMessagesPerHour: 5, // DRAMATICALLY LOWERED from 15
+  maxMessagesPerDay: 30, // DRAMATICALLY LOWERED from 100
   // Warming schedule
   warmingScheduleEnabled: true,
   // Backup
@@ -516,7 +516,7 @@ function validatePhoneNumber(phone: string): { valid: boolean; error?: string } 
 
 // ==================== SAFE MODE FUNCTIONS ====================
 
-// Check if account is in silent period (istirahat)
+// Check if account is in silent period (resting)
 function isInSilentPeriod(account: Account): boolean {
   if (!SAFE_MODE_CONFIG.silentPeriodEnabled) return false;
   if (!account.silentPeriod?.isActive) return false;
@@ -613,7 +613,7 @@ async function enforceMaxOnlineLimit(): Promise<void> {
 }
 
 // ==================== BURNABLE ACCOUNT MANAGEMENT ====================
-// Strategi untuk akun yang siap "dikorbankan" jika kena ban
+// Strategy for accounts that are ready to be "sacrificed" if they get banned
 
 interface BurnableAccountStats {
   accountId: string;
@@ -625,7 +625,7 @@ interface BurnableAccountStats {
   banCount: number;
   lastBanDate?: Date;
   healthScore: number;
-  replacement?: string; // Account ID pengganti
+  replacement?: string; // Replacement account ID
 }
 
 interface AccountLifecycle {
@@ -637,13 +637,13 @@ interface AccountLifecycle {
 
 // Burnable account configuration
 const BURNABLE_CONFIG = {
-  // Akun yang sudah "mati" dan perlu diganti
+  // Accounts that are already "dead" and need to be replaced
   bannedAccounts: new Map<string, BurnableAccountStats>(),
-  
-  // Queue untuk akun pengganti
+
+  // Queue for replacement accounts
   replacementQueue: [] as string[],
-  
-  // Akun cadangan (fresh)
+
+  // Reserve accounts (fresh)
   reserveAccounts: [] as string[],
   
   // Stats tracking
@@ -661,14 +661,14 @@ const BURNABLE_CONFIG = {
   healthCriticalThreshold: 15,
 };
 
-// Hitung health score untuk burnable account
+// Calculate health score for a burnable account
 function calculateBurnableHealth(account: Account): number {
   if (!account.warmingStats) return 0;
-  
+
   let score = 100;
-  
-  // Faktor negatif
-  const daysSinceActivity = account.warmingStats.lastActivity 
+
+  // Negative factors
+  const daysSinceActivity = account.warmingStats.lastActivity
     ? (Date.now() - account.warmingStats.lastActivity.getTime()) / (1000 * 60 * 60 * 24)
     : 999;
   
@@ -676,17 +676,17 @@ function calculateBurnableHealth(account: Account): number {
   else if (daysSinceActivity > 3) score -= 25;
   else if (daysSinceActivity > 1) score -= 10;
   
-  // Ratio messages sent/received (terlalu banyak kirim = curiga)
+  // Ratio of messages sent/received (sending too many = suspicious)
   const ratio = account.warmingStats.messagesSent / Math.max(account.warmingStats.messagesReceived, 1);
-  if (ratio > 3) score -= 30; // Kirim 3x lebih banyak dari terima
+  if (ratio > 3) score -= 30; // Sending 3x more than receiving
   else if (ratio > 2) score -= 15;
-  
-  // Account age (akun baru lebih riskan)
-  const daysSinceStart = account.warmingStats.warmingStartTime 
+
+  // Account age (newer accounts are riskier)
+  const daysSinceStart = account.warmingStats.warmingStartTime
     ? (Date.now() - account.warmingStats.warmingStartTime.getTime()) / (1000 * 60 * 60 * 24)
     : 0;
   
-  if (daysSinceStart < 1) score -= 20; // Akun baru < 1 hari
+  if (daysSinceStart < 1) score -= 20; // New account < 1 day
   else if (daysSinceStart < 3) score -= 10;
   
   return Math.max(0, Math.min(100, score));
