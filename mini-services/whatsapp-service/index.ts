@@ -289,21 +289,21 @@ let groqInstance: Groq | null = null;
 
 // Fallback responses when all AI fails
 const FALLBACK_RESPONSES = [
-  'Oke siap!',
-  'Baik, noted!',
-  'Hmm iya bener',
-  'Wah menarik ya',
-  'Haha iya 😄',
-  'Oh gitu ya',
-  'Serius? Wkwkw',
-  'Haha emang gitu',
-  'Iya bener tuh',
-  'Oh oke noted!',
-  'Wkwkw lucu sih',
-  'Hmm iya juga sih',
-  'Bener juga ya',
-  'Oh iya? Baru tau',
-  'Haha biasa aja'
+  'Okay, got it!',
+  'Sounds good, noted!',
+  'Hmm yeah true',
+  'Oh that\'s interesting',
+  'Haha yeah 😄',
+  'Oh I see',
+  'Seriously? Lol',
+  'Haha yeah that\'s how it is',
+  'Yeah exactly',
+  'Oh okay, noted!',
+  'Lol that\'s funny',
+  'Hmm yeah I guess',
+  'True though',
+  'Oh really? Didn\'t know that',
+  'Haha no worries'
 ];
 
 // ==================== AI API SETTINGS ====================
@@ -367,6 +367,10 @@ const reconnectAttempts: Map<string, number> = new Map();
 // Track if account ever successfully connected (to differentiate QR timeout vs ban)
 const everConnected: Map<string, boolean> = new Map();
 
+// A scanned QR often produces temporary creds, then Baileys restarts with code 515.
+// Keep those creds through that restart instead of treating them as stale.
+const pendingNewLogin: Set<string> = new Set();
+
 // Track accounts that are being intentionally deleted (to prevent auto-reconnect)
 const pendingDeletion: Set<string> = new Set();
 
@@ -414,10 +418,10 @@ let config: Config = {
   presenceUpdateInterval: 60, // 60 menit (dari 30 menit)
   typingSimulationEnabled: false, // DIMATIKAN - berisiko terdeteksi
   readReceiptsEnabled: true,
-  aiSystemPrompt: `Kamu adalah orang Indonesia yang ramah dan santai.
-Balas pesan dengan gaya chat WhatsApp yang natural, singkat (1-2 kalimat), dan kadang pakai emoji.
-Jangan terlihat seperti bot atau AI. Gunakan bahasa casual seperti "gimana", "yaudah", "btw", dll.
-PENTING: Jangan terlalu cepat merespon. Jangan terlalu aktif. Kadang tidak perlu balas.`,
+  aiSystemPrompt: `You are a friendly and laid-back person.
+Reply to messages in a natural WhatsApp chat style, keep it short (1-2 sentences), and sometimes use emoji.
+Don't sound like a bot or an AI. Use casual language like "how's it going", "alright", "btw", etc.
+IMPORTANT: Don't reply too quickly. Don't be too active. Sometimes there's no need to reply at all.`,
   warmingIntensity: 'low', // DITURUNKAN dari medium
   activePoolSize: 10, // DITURUNKAN dari 25
   idlePoolSize: 20, // DITURUNKAN dari 35
@@ -758,6 +762,7 @@ async function handleBannedAccount(accountId: string, reason?: string): Promise<
 
   // Clean up reconnect attempts (no more retries needed)
   reconnectAttempts.delete(accountId);
+  pendingNewLogin.delete(accountId);
 
   // IMPORTANT: We do NOT delete from personalityRegistry
   // This prevents personality regeneration if startSession is somehow called again
@@ -801,148 +806,148 @@ function getBurnableStats() {
 
 const TOPIC_CATEGORIES = {
   daily_life: {
-    name: 'Kehidupan Sehari-hari',
+    name: 'Daily Life',
     topics: [
-      'Lagi ngapain sekarang?',
-      'Udah makan belum?',
-      'Kemarin ngapain aja?',
-      'Weekend ada rencana apa?',
-      'Lagi sibuk ga sih?',
-      'Cuaca hari ini gimana di tempatmu?',
-      'Udah sarapan?',
-      'Lagi di kantor atau di rumah?',
-      'Hari ini lembur ga?',
-      'Traffic tadi gimana?'
+      'What are you up to right now?',
+      'Have you eaten yet?',
+      'What did you get up to yesterday?',
+      'Any plans for the weekend?',
+      'Are you busy these days?',
+      'How\'s the weather where you are?',
+      'Had breakfast yet?',
+      'Are you at the office or home?',
+      'Working late today?',
+      'How was the traffic earlier?'
     ]
   },
   work_study: {
-    name: 'Kerja/Kuliah',
+    name: 'Work/Study',
     topics: [
-      'Kerjaan lagi banyak ga?',
-      'Deadline ada ga?',
-      'Boss nyebelin ga?',
-      'Rekan kerja gimana?',
-      'Ada meeting banyak ga hari ini?',
-      'Kantor enak ga sih?',
-      'Kuliah lagi sibuk?',
-      'Tugas banyak?',
-      'Ujian dah dekat?',
-      'Dosen killer ada?'
+      'Lots of work on your plate?',
+      'Any deadlines coming up?',
+      'Is your boss being annoying?',
+      'How are your coworkers?',
+      'Lots of meetings today?',
+      'Is your office a nice place to work?',
+      'Busy with classes lately?',
+      'Tons of assignments?',
+      'Are exams coming up soon?',
+      'Any strict professors?'
     ]
   },
   entertainment: {
-    name: 'Hiburan',
+    name: 'Entertainment',
     topics: [
-      'Nonton film apa belakangan?',
-      'Drama Korea ada rekomendasi?',
-      'Film horor ada yang bagus?',
-      'Lagu enak apa sekarang?',
-      'Konser ada yang mau dateng?',
-      'Netflix ada tontonan bagus?',
-      'Anime ada rekomendasi?',
-      'Game lagi main apa?',
-      'YouTube sering nonton apa?',
-      'Podcast dengerin apa?'
+      'Watched any good movies lately?',
+      'Any K-drama recommendations?',
+      'Any good horror movies out?',
+      'What songs are you into right now?',
+      'Any concerts you want to go to?',
+      'Anything good to watch on Netflix?',
+      'Any anime recommendations?',
+      'What game are you playing?',
+      'What do you watch on YouTube?',
+      'What podcasts do you listen to?'
     ]
   },
   food: {
-    name: 'Makanan',
+    name: 'Food',
     topics: [
-      'Makanan favorit apa?',
-      'Restoran enak ada rekomendasi?',
-      'Pedes suka ga?',
-      'Suka masak?',
-      'Mie ayam enak dimana?',
-      'Kopi atau teh?',
-      'Jajanan malam ada yang enak?',
-      'Diet lagi ga?',
-      'Suka makanan apa?',
-      'Makan siang dimana tadi?'
+      'What\'s your favorite food?',
+      'Any good restaurant recommendations?',
+      'Do you like spicy food?',
+      'Do you like to cook?',
+      'Where\'s a good place for noodles?',
+      'Coffee or tea?',
+      'Any good late-night snacks?',
+      'Are you on a diet right now?',
+      'What kind of food do you like?',
+      'Where did you have lunch earlier?'
     ]
   },
   travel: {
     name: 'Traveling',
     topics: [
-      'Liburan terakhir kemana?',
-      'Destinasi impian?',
-      'Pantai atau gunung?',
-      'Naik pesawat suka?',
-      'Wisata lokal ada rekomendasi?',
-      'Staycation pernah?',
-      'Jalan-jalan sendiri atau bareng?',
-      'Backpacker pernah?',
-      'Hotel favorit?',
-      'Wisata kuliner pernah?'
+      'Where was your last vacation?',
+      'What\'s your dream destination?',
+      'Beach or mountains?',
+      'Do you like flying?',
+      'Any local spots you\'d recommend?',
+      'Ever done a staycation?',
+      'Do you travel solo or with people?',
+      'Ever gone backpacking?',
+      'Favorite hotel?',
+      'Ever done a food tour?'
     ]
   },
   technology: {
-    name: 'Teknologi',
+    name: 'Technology',
     topics: [
-      'HP baru ada yang bagus?',
-      'iPhone atau Android?',
-      'Laptop rekomendasi?',
-      'ChatGPT pernah pake?',
-      'Apps produktif ada rekomendasi?',
-      'Gaming PC atau console?',
-      'Smartwatch punya?',
-      'Internet di rumah cepet?',
-      'Sosmed apa yang sering?',
-      'TikTok sering scroll?'
+      'Any good new phones out?',
+      'iPhone or Android?',
+      'Any laptop recommendations?',
+      'Ever used ChatGPT?',
+      'Any productivity apps you recommend?',
+      'Gaming PC or console?',
+      'Do you have a smartwatch?',
+      'Is your home internet fast?',
+      'What social media do you use most?',
+      'Do you scroll TikTok a lot?'
     ]
   },
   sports: {
-    name: 'Olahraga',
+    name: 'Sports',
     topics: [
-      'Olahraga apa yang suka?',
-      'Gym atau jogging?',
-      'Badminton main ga?',
-      'Futsal sering?',
-      'Nonton bola ga?',
-      'Tim bola favorit?',
-      'Olympics nonton ga?',
-      'Renang bisa?',
-      'Yoga pernah coba?',
-      'Gym membership punya?'
+      'What sports do you like?',
+      'Gym or jogging?',
+      'Do you play badminton?',
+      'Play soccer often?',
+      'Do you watch football?',
+      'Favorite football team?',
+      'Did you watch the Olympics?',
+      'Can you swim?',
+      'Ever tried yoga?',
+      'Do you have a gym membership?'
     ]
   },
   personal: {
-    name: 'Pribadi',
+    name: 'Personal',
     topics: [
-      'Aku kemarin mimpi aneh',
-      'Lagi mood apa hari ini?',
-      'Resolusi tahun ini apa?',
-      'Habit baru coba?',
-      'Lagi belajar apa?',
-      'Project pribadi ada?',
-      'Impian jangka panjang?',
-      'Kebiasaan pagi apa?',
-      'Sleep schedule gimana?',
-      'Me time kayak gimana?'
+      'I had a weird dream yesterday',
+      'What kind of mood are you in today?',
+      'What\'s your resolution this year?',
+      'Trying any new habits?',
+      'What are you learning these days?',
+      'Any personal projects going on?',
+      'What are your long-term dreams?',
+      'What\'s your morning routine?',
+      'How\'s your sleep schedule?',
+      'What\'s your idea of me time?'
     ]
   },
   trending: {
     name: 'Trending',
     topics: [
-      'Berita hari ini baca?',
-      'Viral lagi apa?',
-      'Meme terbaru ada?',
-      'Trending topic liat?',
-      'Gosip artis dengar?',
-      'Event lagi ada?',
-      'Promo lagi ada?',
-      'Black Friday ada?',
-      'Sale besar ada?',
-      'Tren fashion baru?'
+      'Read the news today?',
+      'What\'s going viral lately?',
+      'Any new memes?',
+      'Seen the trending topics?',
+      'Heard any celebrity gossip?',
+      'Any events going on?',
+      'Any promos right now?',
+      'Anything for Black Friday?',
+      'Any big sales going on?',
+      'Any new fashion trends?'
     ]
   }
 };
 
 // Relationship stages with conversation depth
 const RELATIONSHIP_STAGES = {
-  stranger: { minMessages: 0, maxMessages: 5, description: 'Baru kenal' },
-  acquaintance: { minMessages: 5, maxMessages: 15, description: 'Sudah kenal' },
-  friend: { minMessages: 15, maxMessages: 30, description: 'Teman' },
-  close_friend: { minMessages: 30, maxMessages: 999, description: 'Teman dekat' }
+  stranger: { minMessages: 0, maxMessages: 5, description: 'Just met' },
+  acquaintance: { minMessages: 5, maxMessages: 15, description: 'Acquaintances' },
+  friend: { minMessages: 15, maxMessages: 30, description: 'Friends' },
+  close_friend: { minMessages: 30, maxMessages: 999, description: 'Close friends' }
 } as const;
 
 // Find shared interests between two personalities
@@ -954,16 +959,16 @@ function findSharedInterests(p1: Personality | null, p2: Personality | null): st
 // Determine topic category based on shared interests
 function getTopicCategoryForInterests(interests: string[]): keyof typeof TOPIC_CATEGORIES {
   const interestToCategory: Record<string, keyof typeof TOPIC_CATEGORIES> = {
-    'musik': 'entertainment',
-    'film': 'entertainment',
+    'music': 'entertainment',
+    'movies': 'entertainment',
     'gaming': 'technology',
     'traveling': 'travel',
-    'kuliner': 'food',
-    'fotografi': 'daily_life',
-    'olahraga': 'sports',
-    'membaca': 'entertainment',
-    'nonton drama': 'entertainment',
-    'jalan-jalan': 'travel'
+    'food': 'food',
+    'photography': 'daily_life',
+    'sports': 'sports',
+    'reading': 'entertainment',
+    'watching shows': 'entertainment',
+    'going out': 'travel'
   };
   
   for (const interest of interests) {
@@ -1019,13 +1024,13 @@ function updateRelationshipStage(pair: ChatPair): void {
 function getRelationshipStyle(stage: ChatPair['relationshipStage']): string {
   switch (stage) {
     case 'stranger':
-      return 'Masih baru kenal, jadi masih agak formal dan sopan. Tanya-tanya dulu.';
+      return 'You just met, so keep it a bit formal and polite. Ask some questions first.';
     case 'acquaintance':
-      return 'Sudah kenal, mulai bisa bercanda sedikit. Lebih santai.';
+      return 'You already know each other, so you can joke around a little. More relaxed.';
     case 'friend':
-      return 'Teman akrab, bisa ngomong apa aja. Sering bercanda.';
+      return 'Close friends, you can talk about anything. Joke around often.';
     case 'close_friend':
-      return 'Teman dekat, bisa curhat, bercanda, dan saling support. Tidak ada batasan topik.';
+      return 'Best friends, you can vent, joke around, and support each other. No off-limits topics.';
   }
 }
 
@@ -1034,18 +1039,18 @@ function buildConversationContext(pair: ChatPair, sender: Account, receiver: Acc
   const sharedInterests = findSharedInterests(sender.personality, receiver.personality);
   const relStyle = getRelationshipStyle(pair.relationshipStage);
   
-  let context = `Kamu sedang chat dengan ${receiver.personality?.name || 'seseorang'}.
-Topik pembicaraan sekarang: "${pair.currentTopic}"
-Kategori: ${pair.topicCategory}
-Tingkat hubungan: ${RELATIONSHIP_STAGES[pair.relationshipStage].description}
-Gaya: ${relStyle}`;
+  let context = `You're chatting with ${receiver.personality?.name || 'someone'}.
+Current topic: "${pair.currentTopic}"
+Category: ${pair.topicCategory}
+Relationship level: ${RELATIONSHIP_STAGES[pair.relationshipStage].description}
+Style: ${relStyle}`;
 
   if (sharedInterests.length > 0) {
-    context += `\nKalian punya hobi yang sama: ${sharedInterests.join(', ')}`;
+    context += `\nYou both share these hobbies: ${sharedInterests.join(', ')}`;
   }
-  
+
   if (pair.conversationContext.length > 0) {
-    context += `\nPercakapan terakhir:\n${pair.conversationContext.slice(-3).join('\n')}`;
+    context += `\nRecent conversation:\n${pair.conversationContext.slice(-3).join('\n')}`;
   }
   
   return context;
@@ -1736,19 +1741,19 @@ async function generateAIResponse(message: string, personality: Personality | nu
   let systemPrompt = config.aiSystemPrompt;
   
   if (personality) {
-    systemPrompt = `Kamu adalah ${personality.name}, seorang ${personality.occupation} berusia ${personality.age} tahun dari ${personality.location}.
+    systemPrompt = `You are ${personality.name}, a ${personality.age}-year-old ${personality.occupation} from ${personality.location}.
 
-Kepribadianmu: ${personality.traits.join(', ')}.
-Hobimu: ${personality.hobbies.join(', ')}.
-Gaya menulis: ${personality.writingStyle}.
-Gaya respons: ${personality.responseStyle}.
+Your personality: ${personality.traits.join(', ')}.
+Your hobbies: ${personality.hobbies.join(', ')}.
+Writing style: ${personality.writingStyle}.
+Response style: ${personality.responseStyle}.
 
-PENTING:
-- Balas pesan dengan gaya chat WhatsApp yang natural dan konsisten dengan kepribadianmu
-- Jangan pernah mengatakan bahwa kamu adalah AI atau bot
-- Gunakan bahasa casual Indonesia dengan gaya khasmu
-- Balas singkat (1-2 kalimat) dan natural
-- Kadang gunakan emoji yang sesuai dengan kepribadianmu`;
+IMPORTANT:
+- Reply in a natural WhatsApp chat style that's consistent with your personality
+- Never say that you are an AI or a bot
+- Use casual English in your own personal style
+- Keep replies short (1-2 sentences) and natural
+- Sometimes use emoji that fit your personality`;
   }
   
   // Add conversation context if available
@@ -1792,8 +1797,8 @@ async function preGeneratePersonalities(count: number = 10) {
   
   isGeneratingPersonalities = true;
   
-  const personalityPrompt = `Generate ${Math.min(5, count - personalityPool.length)} unique Indonesian personalities for WhatsApp accounts.
-Return as JSON array: [{"name":"Nama","age":25,"occupation":"Pekerjaan","location":"Kota","traits":["trait1","trait2"],"writingStyle":"gaya","hobbies":["hobi1","hobi2"],"responseStyle":"gaya respons"}]
+  const personalityPrompt = `Generate ${Math.min(5, count - personalityPool.length)} unique English-speaking personalities for WhatsApp accounts.
+Return as JSON array: [{"name":"Name","age":25,"occupation":"Occupation","location":"City","traits":["trait1","trait2"],"writingStyle":"style","hobbies":["hobby1","hobby2"],"responseStyle":"response style"}]
 
 Make each personality unique and diverse.`;
 
@@ -1839,28 +1844,28 @@ const CHRONOTYPE_CONFIGS = {
     activeHoursStart: 5,   // 5 AM
     activeHoursEnd: 21,    // 9 PM
     peakHours: [7, 8, 9, 12, 13, 17, 18], // Morning & lunch & early evening
-    description: 'Aktif pagi, tidur malam'
+    description: 'Active in the morning, sleeps early'
   },
   night_owl: {
     name: 'Night Owl' as const,
     activeHoursStart: 10,  // 10 AM
     activeHoursEnd: 2,     // 2 AM (next day)
     peakHours: [13, 14, 20, 21, 22, 23, 0, 1], // Afternoon & night
-    description: 'Bangun siang, aktif malam'
+    description: 'Wakes up late, active at night'
   },
   regular: {
     name: 'Regular' as const,
     activeHoursStart: 7,   // 7 AM
     activeHoursEnd: 22,    // 10 PM
     peakHours: [8, 9, 12, 13, 18, 19, 20], // Normal work hours
-    description: 'Jadwal normal'
+    description: 'Normal schedule'
   },
   flexible: {
     name: 'Flexible' as const,
     activeHoursStart: 6,   // 6 AM
     activeHoursEnd: 23,    // 11 PM
     peakHours: [9, 10, 14, 15, 19, 20, 21], // Flexible hours
-    description: 'Fleksibel, bisa kapan saja'
+    description: 'Flexible, can be anytime'
   }
 };
 
@@ -1908,40 +1913,40 @@ async function generateUniquePersonality(accountId: string): Promise<Personality
     return personality || null;
   }
 
-  const indonesianNames = [
-    'Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fitri', 'Gunawan', 'Hani', 'Indra', 'Joko',
-    'Kartini', 'Lukman', 'Maya', 'Nadia', 'Oscar', 'Putri', 'Rizki', 'Sari', 'Toni', 'Wati',
-    'Yudi', 'Zahra', 'Ahmad', 'Bella', 'Dimas', 'Eva', 'Fajar', 'Gita', 'Hendra', 'Irma'
+  const englishNames = [
+    'Alex', 'Ben', 'Chloe', 'Daisy', 'Ethan', 'Faith', 'George', 'Hannah', 'Ian', 'Jack',
+    'Katie', 'Liam', 'Maya', 'Nadia', 'Oscar', 'Paige', 'Ryan', 'Sara', 'Tony', 'Wendy',
+    'Yusuf', 'Zara', 'Aaron', 'Bella', 'Dylan', 'Eva', 'Felix', 'Gina', 'Henry', 'Irene'
   ];
 
   const occupations = [
-    'Mahasiswa', 'Karyawan swasta', 'Wiraswasta', 'Guru', 'Dokter', 'Programmer', 
-    'Desainer', 'Pengusaha', 'Freelancer', 'Content creator', 'Pekerja seni',
-    'Konsultan', 'Pegawai negeri', 'Penjual online', 'Barista', 'Fotografer'
+    'Student', 'Office worker', 'Entrepreneur', 'Teacher', 'Doctor', 'Programmer',
+    'Designer', 'Business owner', 'Freelancer', 'Content creator', 'Artist',
+    'Consultant', 'Civil servant', 'Online seller', 'Barista', 'Photographer'
   ];
 
   const locations = [
-    'Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Semarang', 'Malang', 
-    'Bekasi', 'Tangerang', 'Depok', 'Bogor', 'Solo', 'Medan', 'Makassar'
+    'New York', 'London', 'Chicago', 'Austin', 'Seattle', 'Manchester',
+    'Boston', 'Denver', 'Portland', 'Toronto', 'Dublin', 'Atlanta', 'San Diego'
   ];
 
-  const traitsPool = ['ramah', 'humoris', 'penyabar', 'aktif', 'kreatif', 'peduli', 'tekun', 'santai'];
-  const hobbiesPool = ['musik', 'film', 'gaming', 'traveling', 'kuliner', 'fotografi', 'olahraga', 'membaca', 'nonton drama', 'jalan-jalan'];
+  const traitsPool = ['friendly', 'funny', 'patient', 'energetic', 'creative', 'caring', 'hardworking', 'easygoing'];
+  const hobbiesPool = ['music', 'movies', 'gaming', 'traveling', 'food', 'photography', 'sports', 'reading', 'watching shows', 'going out'];
   const writingStyles = [
-    'suka pakai emoji di setiap pesan 😊',
-    'jarang pakai emoji, lebih ke teks biasa',
-    'suka pakai bahasa gaul Jakarta',
-    'suka pakai "wkwk" atau "haha"',
-    'suka pake singkatan (yg, gpp, bgt)',
-    'respon formal dan sopan'
+    'loves using emoji in every message 😊',
+    'rarely uses emoji, prefers plain text',
+    'likes using slang',
+    'likes using "lol" or "haha"',
+    'likes using abbreviations (tbh, idk, ngl)',
+    'replies formally and politely'
   ];
   const responseStyles = [
-    'cepat merespon, langsung ke inti',
-    'suka nanya balik sebelum jawab',
-    'suka kasih saran atau solusi',
-    'respon singkat tapi bermakna',
-    'suka cerita panjang lebar',
-    'suka pake pertanyaan di akhir kalimat'
+    'replies quickly, straight to the point',
+    'likes asking questions back before answering',
+    'likes giving advice or solutions',
+    'short but meaningful replies',
+    'likes telling long stories',
+    'likes ending sentences with a question'
   ];
 
   // Determine chronotype based on occupation
@@ -1949,10 +1954,10 @@ async function generateUniquePersonality(accountId: string): Promise<Personality
   let chronotype: Personality['chronotype'] = 'regular';
   
   // Some occupations tend to have specific sleep patterns
-  if (['Mahasiswa', 'Content creator', 'Freelancer', 'Desainer', 'Programmer'].includes(occupation)) {
+  if (['Student', 'Content creator', 'Freelancer', 'Designer', 'Programmer'].includes(occupation)) {
     // Higher chance of being night owl
     chronotype = Math.random() > 0.4 ? 'night_owl' : 'flexible';
-  } else if (['Guru', 'Pegawai negeri', 'Dokter', 'Barista'].includes(occupation)) {
+  } else if (['Teacher', 'Civil servant', 'Doctor', 'Barista'].includes(occupation)) {
     // Higher chance of being early bird
     chronotype = Math.random() > 0.4 ? 'early_bird' : 'regular';
   } else {
@@ -1976,7 +1981,7 @@ async function generateUniquePersonality(accountId: string): Promise<Personality
   const randomHobbies = Array.from({ length: 3 }, () => getRandomItem(hobbiesPool));
   
   const personality: Personality = {
-    name: getRandomItem(indonesianNames),
+    name: getRandomItem(englishNames),
     age: Math.floor(Math.random() * 22) + 18,
     occupation,
     location: getRandomItem(locations),
@@ -2093,6 +2098,7 @@ async function checkSessionDataStatus(accountId: string): Promise<{ exists: bool
 async function clearSessionData(accountId: string): Promise<void> {
   const sessionDir = join(SESSIONS_DIR, accountId);
   const backupDir = join(BACKUP_DIR, accountId);
+  pendingNewLogin.delete(accountId);
   
   try {
     // Clear session directory
@@ -2134,6 +2140,7 @@ async function startSession(accountId: string, options: StartSessionOptions = {}
     // This is the KEY FIX for Railway where old sessions persist
     if (forceNew) {
       console.log('[SESSION] forceNew=true, clearing old session data...');
+      pendingNewLogin.delete(accountId);
       await clearSessionData(accountId);
       addLog('info', `🗑️ Cleared old session data (forceNew=true)`, accountId);
     }
@@ -2144,10 +2151,14 @@ async function startSession(accountId: string, options: StartSessionOptions = {}
     
     // If has old creds but never connected successfully, might be corrupted
     // Auto-clear and retry once
-    if (sessionStatus.hasCreds && !everConnected.get(accountId) && retryAttempt === 0) {
+    const hasPendingNewLogin = pendingNewLogin.has(accountId);
+    if (sessionStatus.hasCreds && !everConnected.get(accountId) && retryAttempt === 0 && !hasPendingNewLogin) {
       console.log('[SESSION] Found old session data without successful connection, clearing...');
       await clearSessionData(accountId);
       addLog('info', `🗑️ Auto-cleared stale session data`, accountId);
+    } else if (sessionStatus.hasCreds && hasPendingNewLogin) {
+      console.log('[SESSION] Preserving newly scanned credentials through restart:', accountId);
+      addLog('info', '✅ QR scanned; completing WhatsApp login after restart', accountId);
     }
 
     // ========== CHECK EXISTING ACCOUNT FOR RECONNECT ==========
@@ -2397,8 +2408,7 @@ async function startSession(accountId: string, options: StartSessionOptions = {}
     // ========== SINGLE CONNECTION UPDATE HANDLER ==========
     console.error('[DEBUG-EVENT] Registering connection.update handler...');
     
-    try {
-      socket.ev.on('connection.update', async (update) => {
+    socket.ev.on('connection.update', async (update) => {
         // Clear debug timeout and WS monitor on first event
         clearTimeout(debugTimeoutId);
         clearInterval(wsMonitorInterval);
@@ -2416,10 +2426,16 @@ async function startSession(accountId: string, options: StartSessionOptions = {}
       });
       console.log('==========================================');
 
+      if (isNewLogin) {
+        pendingNewLogin.add(accountId);
+        addLog('info', '✅ QR scanned; waiting for WhatsApp restart', accountId);
+      }
+
       // ========== HANDLE SUCCESSFUL CONNECTION ==========
       if (connection === 'open') {
         reconnectAttempts.set(accountId, 0);
         everConnected.set(accountId, true);
+        pendingNewLogin.delete(accountId);
         console.log('[CONNECTION] Successfully connected:', accountId);
       }
 
@@ -2433,6 +2449,7 @@ async function startSession(accountId: string, options: StartSessionOptions = {}
       }
 
       if (qr) {
+        pendingNewLogin.delete(accountId);
         console.log('[QR] QR code received for:', accountId, 'usePairingCode:', usePairingCode);
         if (usePairingCode && phoneNumber) {
           try {
@@ -2738,6 +2755,7 @@ function stopWarmingTimers(accountId: string) {
 async function stopSession(accountId: string) {
   // Mark as pending deletion to prevent auto-reconnect
   pendingDeletion.add(accountId);
+  pendingNewLogin.delete(accountId);
 
   const account = accounts.get(accountId);
   if (account?.socket) {
@@ -2990,6 +3008,7 @@ app.post('/banned/clear/:accountId', (req, res) => {
   BURNABLE_CONFIG.bannedAccounts.delete(accountId);
   reconnectAttempts.delete(accountId);
   everConnected.delete(accountId); // Reset connection tracking
+  pendingNewLogin.delete(accountId);
 
   addLog('info', `🔓 Banned status cleared for ${accountId}`);
 
@@ -3013,6 +3032,7 @@ app.post('/personality/reset/:accountId', (req, res) => {
 
   reconnectAttempts.delete(accountId);
   everConnected.delete(accountId); // Reset connection tracking
+  pendingNewLogin.delete(accountId);
 
   addLog('info', `🔄 Personality reset for ${accountId}`);
 
@@ -3087,7 +3107,7 @@ app.post('/ai-settings', (req, res) => {
 
 // Test AI connection
 app.post('/ai-settings/test', async (req, res) => {
-  const testMessage = 'Halo, ini test pesan. Balas dengan singkat dalam bahasa Indonesia.';
+  const testMessage = 'Hi, this is a test message. Reply briefly in English.';
   
   try {
     // Test with Groq
@@ -3103,7 +3123,7 @@ app.post('/ai-settings/test', async (req, res) => {
     const completion = await groq.chat.completions.create({
       model: aiApiSettings.groqModel,
       messages: [
-        { role: 'system', content: 'Kamu adalah orang Indonesia yang ramah. Balas singkat.' },
+        { role: 'system', content: 'You are a friendly person. Reply briefly.' },
         { role: 'user', content: testMessage }
       ],
       max_tokens: 50
@@ -3394,6 +3414,7 @@ app.post('/session/retry/:accountId', async (req, res) => {
   // Reset all tracking for this account
   reconnectAttempts.delete(accountId);
   everConnected.delete(accountId);
+  pendingNewLogin.delete(accountId);
 
   // Delete existing account if present
   const existingAccount = accounts.get(accountId);
@@ -3789,6 +3810,7 @@ app.delete('/account/:id', async (req, res) => {
     // Clear all tracking
     reconnectAttempts.delete(accountId);
     everConnected.delete(accountId);
+    pendingNewLogin.delete(accountId);
 
     // Remove from accounts map
     accounts.delete(accountId);

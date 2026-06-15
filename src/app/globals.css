@@ -3,113 +3,235 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================
+   Material 3 Expressive — token registration for Tailwind v4.
+   Roles are defined as --md-* primitives in :root / .dark below,
+   and surfaced here as utilities (bg-primary, text-on-surface,
+   bg-surface-container-high, text-success, rounded-lg, ...).
+   shadcn's classic names (--card, --muted, ...) are aliased onto
+   M3 roles in :root so existing markup keeps working.
+   ============================================================ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+
+  /* shadcn aliases (kept for compatibility) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* M3 primary / secondary / tertiary / error */
+  --color-on-primary: var(--md-on-primary);
+  --color-primary-container: var(--md-primary-container);
+  --color-on-primary-container: var(--md-on-primary-container);
+  --color-on-secondary: var(--md-on-secondary);
+  --color-secondary-container: var(--md-secondary-container);
+  --color-on-secondary-container: var(--md-on-secondary-container);
+  --color-tertiary: var(--md-tertiary);
+  --color-on-tertiary: var(--md-on-tertiary);
+  --color-tertiary-container: var(--md-tertiary-container);
+  --color-on-tertiary-container: var(--md-on-tertiary-container);
+  --color-error: var(--md-error);
+  --color-on-error: var(--md-on-error);
+  --color-error-container: var(--md-error-container);
+  --color-on-error-container: var(--md-on-error-container);
+
+  /* M3 surfaces & outlines */
+  --color-surface: var(--md-surface);
+  --color-surface-dim: var(--md-surface-dim);
+  --color-surface-bright: var(--md-surface-bright);
+  --color-surface-container-lowest: var(--md-surface-container-lowest);
+  --color-surface-container-low: var(--md-surface-container-low);
+  --color-surface-container: var(--md-surface-container);
+  --color-surface-container-high: var(--md-surface-container-high);
+  --color-surface-container-highest: var(--md-surface-container-highest);
+  --color-on-surface: var(--md-on-surface);
+  --color-on-surface-variant: var(--md-on-surface-variant);
+  --color-outline: var(--md-outline);
+  --color-outline-variant: var(--md-outline-variant);
+
+  /* App status roles */
+  --color-success: var(--md-success);
+  --color-on-success: var(--md-on-success);
+  --color-success-container: var(--md-success-container);
+  --color-on-success-container: var(--md-on-success-container);
+  --color-warning: var(--md-warning);
+  --color-on-warning: var(--md-on-warning);
+  --color-warning-container: var(--md-warning-container);
+  --color-on-warning-container: var(--md-on-warning-container);
+  --color-danger: var(--md-danger);
+  --color-on-danger: var(--md-on-danger);
+  --color-danger-container: var(--md-danger-container);
+  --color-on-danger-container: var(--md-on-danger-container);
+
+  /* M3 Expressive shape scale */
+  --radius-xs: 0.5rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 1.75rem;
+  --radius-2xl: 2.25rem;
+  --radius-3xl: 2.75rem;
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 1rem;
+
+  /* ---- M3 primary: WhatsApp-adjacent expressive green (h≈150) ---- */
+  --md-primary: oklch(0.58 0.15 150);
+  --md-on-primary: oklch(0.99 0.01 150);
+  --md-primary-container: oklch(0.92 0.07 150);
+  --md-on-primary-container: oklch(0.30 0.09 150);
+
+  /* ---- secondary: teal (h≈185) ---- */
+  --md-secondary: oklch(0.55 0.08 185);
+  --md-on-secondary: oklch(0.99 0.01 185);
+  --md-secondary-container: oklch(0.91 0.05 185);
+  --md-on-secondary-container: oklch(0.30 0.06 185);
+
+  /* ---- tertiary: violet (h≈300) ---- */
+  --md-tertiary: oklch(0.56 0.16 300);
+  --md-on-tertiary: oklch(0.99 0.01 300);
+  --md-tertiary-container: oklch(0.92 0.07 300);
+  --md-on-tertiary-container: oklch(0.32 0.11 300);
+
+  /* ---- error (h≈27) ---- */
+  --md-error: oklch(0.58 0.22 27);
+  --md-on-error: oklch(0.99 0.01 27);
+  --md-error-container: oklch(0.92 0.07 27);
+  --md-on-error-container: oklch(0.32 0.13 27);
+
+  /* ---- surfaces (near-white, faint green tint) ---- */
+  --md-surface: oklch(0.99 0.004 150);
+  --md-surface-dim: oklch(0.91 0.005 150);
+  --md-surface-bright: oklch(0.99 0.004 150);
+  --md-surface-container-lowest: oklch(1 0 0);
+  --md-surface-container-low: oklch(0.975 0.004 150);
+  --md-surface-container: oklch(0.96 0.005 150);
+  --md-surface-container-high: oklch(0.945 0.005 150);
+  --md-surface-container-highest: oklch(0.93 0.006 150);
+
+  /* ---- on-surface / outlines ---- */
+  --md-on-surface: oklch(0.22 0.01 150);
+  --md-on-surface-variant: oklch(0.45 0.01 150);
+  --md-outline: oklch(0.62 0.01 150);
+  --md-outline-variant: oklch(0.87 0.006 150);
+
+  /* ---- app status: online / connecting / offline ---- */
+  --md-success: oklch(0.60 0.14 150);
+  --md-on-success: oklch(0.99 0.01 150);
+  --md-success-container: oklch(0.92 0.07 150);
+  --md-on-success-container: oklch(0.30 0.09 150);
+  --md-warning: oklch(0.74 0.15 75);
+  --md-on-warning: oklch(0.25 0.06 75);
+  --md-warning-container: oklch(0.93 0.08 85);
+  --md-on-warning-container: oklch(0.38 0.09 75);
+  --md-danger: oklch(0.58 0.22 27);
+  --md-on-danger: oklch(0.99 0.01 27);
+  --md-danger-container: oklch(0.92 0.07 27);
+  --md-on-danger-container: oklch(0.32 0.13 27);
+
+  /* charts (expressive multi-hue) */
+  --chart-1: oklch(0.58 0.15 150);
+  --chart-2: oklch(0.55 0.08 185);
+  --chart-3: oklch(0.56 0.16 300);
+  --chart-4: oklch(0.74 0.15 75);
+  --chart-5: oklch(0.58 0.22 27);
+
+  /* ---- shadcn aliases → M3 roles ---- */
+  --background: var(--md-surface);
+  --foreground: var(--md-on-surface);
+  --card: var(--md-surface-container-low);
+  --card-foreground: var(--md-on-surface);
+  --popover: var(--md-surface-container-low);
+  --popover-foreground: var(--md-on-surface);
+  --primary: var(--md-primary);
+  --primary-foreground: var(--md-on-primary);
+  --secondary: var(--md-secondary-container);
+  --secondary-foreground: var(--md-on-secondary-container);
+  --muted: var(--md-surface-container-high);
+  --muted-foreground: var(--md-on-surface-variant);
+  --accent: var(--md-surface-container-highest);
+  --accent-foreground: var(--md-on-surface);
+  --destructive: var(--md-error);
+  --border: var(--md-outline-variant);
+  --input: var(--md-outline-variant);
+  --ring: var(--md-primary);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --md-primary: oklch(0.82 0.14 150);
+  --md-on-primary: oklch(0.26 0.08 150);
+  --md-primary-container: oklch(0.40 0.10 150);
+  --md-on-primary-container: oklch(0.90 0.07 150);
+
+  --md-secondary: oklch(0.80 0.07 185);
+  --md-on-secondary: oklch(0.25 0.05 185);
+  --md-secondary-container: oklch(0.38 0.06 185);
+  --md-on-secondary-container: oklch(0.90 0.05 185);
+
+  --md-tertiary: oklch(0.82 0.13 300);
+  --md-on-tertiary: oklch(0.28 0.10 300);
+  --md-tertiary-container: oklch(0.42 0.12 300);
+  --md-on-tertiary-container: oklch(0.92 0.07 300);
+
+  --md-error: oklch(0.70 0.19 22);
+  --md-on-error: oklch(0.27 0.10 22);
+  --md-error-container: oklch(0.42 0.14 25);
+  --md-on-error-container: oklch(0.92 0.07 22);
+
+  --md-surface: oklch(0.17 0.006 150);
+  --md-surface-dim: oklch(0.17 0.006 150);
+  --md-surface-bright: oklch(0.30 0.008 150);
+  --md-surface-container-lowest: oklch(0.13 0.006 150);
+  --md-surface-container-low: oklch(0.20 0.007 150);
+  --md-surface-container: oklch(0.22 0.007 150);
+  --md-surface-container-high: oklch(0.26 0.008 150);
+  --md-surface-container-highest: oklch(0.30 0.008 150);
+
+  --md-on-surface: oklch(0.92 0.006 150);
+  --md-on-surface-variant: oklch(0.78 0.01 150);
+  --md-outline: oklch(0.60 0.01 150);
+  --md-outline-variant: oklch(0.38 0.008 150);
+
+  --md-success: oklch(0.78 0.13 150);
+  --md-on-success: oklch(0.26 0.08 150);
+  --md-success-container: oklch(0.40 0.10 150);
+  --md-on-success-container: oklch(0.90 0.07 150);
+  --md-warning: oklch(0.80 0.14 80);
+  --md-on-warning: oklch(0.27 0.06 75);
+  --md-warning-container: oklch(0.42 0.09 75);
+  --md-on-warning-container: oklch(0.92 0.08 85);
+  --md-danger: oklch(0.70 0.19 22);
+  --md-on-danger: oklch(0.27 0.10 22);
+  --md-danger-container: oklch(0.42 0.14 25);
+  --md-on-danger-container: oklch(0.92 0.07 22);
+
+  --chart-1: oklch(0.82 0.14 150);
+  --chart-2: oklch(0.80 0.07 185);
+  --chart-3: oklch(0.82 0.13 300);
+  --chart-4: oklch(0.80 0.14 80);
+  --chart-5: oklch(0.70 0.19 22);
 }
 
 @layer base {
@@ -118,5 +240,51 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ============================================================
+   M3 state layers — a translucent overlay of a role color at
+   hover 8% / focus 10% / press 12%. Opt in via a `state-layer-*`
+   class on a `relative` element; content should sit above ::after.
+   ============================================================ */
+@layer components {
+  [class*="state-layer-"] {
+    position: relative;
+  }
+  [class*="state-layer-"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  [class*="state-layer-"]:hover::after {
+    opacity: 0.08;
+  }
+  [class*="state-layer-"]:focus-visible::after {
+    opacity: 0.1;
+  }
+  [class*="state-layer-"]:active::after {
+    opacity: 0.12;
+  }
+
+  .state-layer-primary::after {
+    background: var(--md-primary);
+  }
+  .state-layer-on-primary::after {
+    background: var(--md-on-primary);
+  }
+  .state-layer-on-surface::after {
+    background: var(--md-on-surface);
+  }
+  .state-layer-on-secondary-container::after {
+    background: var(--md-on-secondary-container);
+  }
+  .state-layer-on-error::after {
+    background: var(--md-on-error);
   }
 }

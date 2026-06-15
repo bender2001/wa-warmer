@@ -4,19 +4,26 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+// Material 3 Expressive chips/badges: pill shape, container tonal roles.
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
+  "inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3.5 [&>svg]:pointer-events-none transition-colors overflow-hidden focus-visible:ring-ring/50 focus-visible:ring-[3px]",
   {
     variants: {
       variant: {
-        default:
-          "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
-        secondary:
-          "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
-        destructive:
-          "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-        outline:
-          "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        // M3 status roles
+        success: "bg-success-container text-on-success-container",
+        warning: "bg-warning-container text-on-warning-container",
+        danger: "bg-danger-container text-on-danger-container",
+        // M3 assist / filter chips
+        assist:
+          "border border-outline-variant bg-surface text-on-surface-variant",
+        filter:
+          "border border-outline-variant bg-surface text-on-surface-variant data-[selected=true]:bg-secondary-container data-[selected=true]:text-on-secondary-container data-[selected=true]:border-transparent",
+        // aliases
+        default: "bg-primary text-on-primary",
+        secondary: "bg-secondary-container text-on-secondary-container",
+        outline: "border border-outline-variant text-on-surface",
+        destructive: "bg-destructive text-on-error",
       },
     },
     defaultVariants: {
