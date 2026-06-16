@@ -32,7 +32,7 @@ export function PoolFilter() {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs text-on-surface-variant">Pool:</span>
+      <span className="md-label-medium text-on-surface-variant">Pool:</span>
       {POOLS.map((pool) => (
         <FilterChip
           key={pool.value}

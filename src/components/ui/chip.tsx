@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { Check } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { badgeVariants } from "@/components/ui/badge"
-import { spring } from "@/lib/motion"
+import { spatial } from "@/lib/motion"
 
 type FilterChipProps = Omit<React.ComponentProps<typeof motion.button>, "children"> & {
   selected?: boolean
@@ -15,7 +15,7 @@ type FilterChipProps = Omit<React.ComponentProps<typeof motion.button>, "childre
   children?: React.ReactNode
 }
 
-// Material 3 filter chip — pill, leading check when selected, springy press.
+// Material 3 filter chip — small (8dp) shape, leading check when selected, springy press.
 function FilterChip({
   className,
   selectedClassName,
@@ -23,15 +23,16 @@ function FilterChip({
   children,
   ...props
 }: FilterChipProps) {
+  const reduceMotion = useReducedMotion()
   return (
     <motion.button
       type="button"
       data-selected={selected}
-      whileTap={{ scale: 0.94 }}
-      transition={spring.fast}
+      whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+      transition={spatial.fast}
       className={cn(
         badgeVariants({ variant: "filter" }),
-        "state-layer-on-surface h-8 cursor-pointer px-4 text-sm",
+        "state-layer-on-surface md-label-large h-8 cursor-pointer rounded-[var(--radius-sm)] px-4 outline-none focus-visible:ring-[3px] focus-visible:ring-primary/50",
         selectedClassName,
         className
       )}

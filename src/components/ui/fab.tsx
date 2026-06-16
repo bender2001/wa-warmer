@@ -32,7 +32,7 @@ function Fab({
       whileTap="tap"
       layout
       className={cn(
-        "state-layer-on-primary bg-primary text-on-primary fixed bottom-6 right-6 z-40 inline-flex h-14 items-center justify-center gap-3 rounded-[var(--radius-xl)] shadow-lg",
+        "state-layer-on-primary-container bg-primary-container text-on-primary-container fixed bottom-6 right-6 z-40 inline-flex h-14 items-center justify-center gap-3 rounded-[var(--radius-lg)] md-elevation-3 transition-shadow hover:md-elevation-4",
         extended ? "px-5" : "w-14 px-0",
         className
       )}
@@ -43,7 +43,7 @@ function Fab({
       {extended && (
         <motion.span
           layout
-          className="text-sm font-medium tracking-[0.01em] whitespace-nowrap"
+          className="md-label-large whitespace-nowrap"
         >
           {label}
         </motion.span>

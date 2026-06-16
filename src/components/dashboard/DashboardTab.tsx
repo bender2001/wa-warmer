@@ -20,7 +20,7 @@ export function DashboardTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Recent Activity</CardTitle>
+            <CardTitle className="md-title-medium">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <ActivityFeed logs={logs} />

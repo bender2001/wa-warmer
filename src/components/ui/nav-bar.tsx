@@ -25,7 +25,7 @@ function NavBar({ items, value, onValueChange, className }: NavBarProps) {
   return (
     <nav
       className={cn(
-        "bg-surface-container border-outline-variant fixed inset-x-0 bottom-0 z-40 flex h-20 items-stretch justify-around border-t px-2 pb-[env(safe-area-inset-bottom)]",
+        "bg-surface-container border-outline-variant md-elevation-2 fixed inset-x-0 bottom-0 z-40 flex h-20 items-stretch justify-around border-t px-2 pb-[env(safe-area-inset-bottom)]",
         className
       )}
     >
@@ -36,7 +36,7 @@ function NavBar({ items, value, onValueChange, className }: NavBarProps) {
             key={v}
             type="button"
             onClick={() => onValueChange(v)}
-            className="group relative flex flex-1 flex-col items-center justify-center gap-1 pt-2"
+            className="group state-layer-on-surface relative flex flex-1 flex-col items-center justify-center gap-1 rounded-[var(--radius-lg)] pt-2 outline-none focus-visible:ring-[3px] focus-visible:ring-primary/40"
             aria-current={active ? "page" : undefined}
           >
             <span className="relative flex h-8 w-16 items-center justify-center">
@@ -49,7 +49,7 @@ function NavBar({ items, value, onValueChange, className }: NavBarProps) {
               )}
               <Icon
                 className={cn(
-                  "relative size-[22px] transition-colors",
+                  "relative size-6 transition-colors",
                   active
                     ? "text-on-secondary-container"
                     : "text-on-surface-variant"
@@ -58,7 +58,7 @@ function NavBar({ items, value, onValueChange, className }: NavBarProps) {
             </span>
             <span
               className={cn(
-                "text-xs font-medium tracking-[0.02em] transition-colors",
+                "md-label-medium transition-colors",
                 active ? "text-on-surface" : "text-on-surface-variant"
               )}
             >

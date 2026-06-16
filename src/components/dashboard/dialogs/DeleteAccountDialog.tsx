@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { useUiStore } from "@/stores/ui-store";
 import { useWarmer } from "@/hooks/useWarmer";
 
@@ -33,14 +34,18 @@ export function DeleteAccountDialog() {
     <AlertDialog open={!!toDelete} onOpenChange={(open) => !open && closeDelete()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-warning" />
+          <AlertDialogTitle className="md-headline-small flex items-center gap-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-error-container text-on-error-container">
+              <AlertTriangle className="size-5" />
+            </span>
             Delete Account
           </AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogDescription className="md-body-medium">
             Are you sure you want to delete{" "}
-            <strong>{toDelete?.personality?.name || toDelete?.id}</strong>? This
-            will logout and remove all session data permanently.
+            <strong className="text-on-surface">
+              {toDelete?.personality?.name || toDelete?.id}
+            </strong>
+            ? This will logout and remove all session data permanently.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -48,11 +53,11 @@ export function DeleteAccountDialog() {
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isDeleting}
-            className="bg-danger text-on-danger hover:bg-danger/90"
+            className="text-danger"
           >
             {isDeleting ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <LoadingIndicator size={18} />
                 Deleting...
               </>
             ) : (

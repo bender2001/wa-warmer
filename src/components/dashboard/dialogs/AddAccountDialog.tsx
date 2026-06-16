@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Plus,
   QrCode,
@@ -10,7 +11,6 @@ import {
   Download,
   Upload,
   CheckCircle,
-  Loader2,
 } from "lucide-react";
 
 import {
@@ -23,15 +23,18 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { TextField } from "@/components/ui/text-field";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 
 import { useUiStore } from "@/stores/ui-store";
 import { useWarmer } from "@/hooks/useWarmer";
 import { useToast } from "@/hooks/use-toast";
 import { wa } from "@/lib/api";
+import { spatial, effects } from "@/lib/motion";
 import type { AddMode, AuthMethod, ExcelUploadResult, BulkQueueStatus } from "@/types";
 
 export function AddAccountDialog() {
@@ -39,6 +42,7 @@ export function AddAccountDialog() {
   const setAddOpen = useUiStore((s) => s.setAddOpen);
   const { startSession, batchStart, uploadExcel, startBulkProcessing, fetchBulkQueue } = useWarmer();
   const { toast } = useToast();
+  const reduceMotion = useReducedMotion();
 
   const [addMode, setAddMode] = useState<AddMode>("single");
   const [newAccountId, setNewAccountId] = useState("");
@@ -134,84 +138,83 @@ export function AddAccountDialog() {
   };
 
   const authToggle = (
-    <div>
-      <Label>Authentication Method</Label>
-      <div className="mt-1.5 flex gap-2">
-        <Button
-          size="sm"
-          variant={authMethod === "qr" ? "filled" : "outlined"}
-          onClick={() => setAuthMethod("qr")}
-          className="flex-1"
-        >
-          <QrCode className="mr-1 h-4 w-4" />
-          QR Code
-        </Button>
-        <Button
-          size="sm"
-          variant={authMethod === "pairing" ? "filled" : "outlined"}
-          onClick={() => setAuthMethod("pairing")}
-          className="flex-1"
-        >
-          <Hash className="mr-1 h-4 w-4" />
-          Pairing
-        </Button>
-      </div>
+    <div className="space-y-1.5">
+      <Label className="md-label-large text-on-surface-variant">Authentication Method</Label>
+      <ButtonGroup
+        value={authMethod}
+        onValueChange={(v) => setAuthMethod(v as AuthMethod)}
+        items={[
+          { value: "qr", label: "QR Code", icon: QrCode },
+          { value: "pairing", label: "Pairing", icon: Hash },
+        ]}
+        className="w-full"
+      />
     </div>
   );
+
+  const revealMotion = reduceMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 8, scale: 0.98 },
+        animate: { opacity: 1, y: 0, scale: 1, transition: spatial.default },
+        exit: { opacity: 0, scale: 0.98, transition: effects.fast },
+      };
 
   return (
     <Dialog open={addOpen} onOpenChange={setAddOpen}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5 text-primary" />
+          <DialogTitle className="md-headline-small flex items-center gap-2">
+            <span className="bg-primary-container text-on-primary-container grid size-9 place-items-center rounded-full">
+              <Plus className="h-5 w-5" />
+            </span>
             Add WhatsApp Account
           </DialogTitle>
-          <DialogDescription>Choose how to add accounts</DialogDescription>
+          <DialogDescription className="md-body-medium">Choose how to add accounts</DialogDescription>
         </DialogHeader>
 
         <Tabs value={addMode} onValueChange={(v) => setAddMode(v as AddMode)} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="single" className="text-xs">Single</TabsTrigger>
-            <TabsTrigger value="bulk" className="text-xs">Bulk Queue</TabsTrigger>
-            <TabsTrigger value="excel" className="text-xs">Excel Upload</TabsTrigger>
+            <TabsTrigger value="single" className="md-label-large">Single</TabsTrigger>
+            <TabsTrigger value="bulk" className="md-label-large">Bulk Queue</TabsTrigger>
+            <TabsTrigger value="excel" className="md-label-large">Excel Upload</TabsTrigger>
           </TabsList>
 
           {/* Single Account Mode */}
           <TabsContent value="single" className="space-y-4 py-4">
-            <div>
-              <Label>Account ID</Label>
-              <Input
-                placeholder="e.g., warmer-1"
-                value={newAccountId}
-                onChange={(e) => setNewAccountId(e.target.value)}
-                className="mt-1.5"
-              />
-            </div>
+            <TextField
+              label="Account ID"
+              placeholder="e.g., warmer-1"
+              value={newAccountId}
+              onChange={(e) => setNewAccountId(e.target.value)}
+            />
 
             {authToggle}
 
-            {authMethod === "pairing" && (
-              <div>
-                <Label>Phone Number</Label>
-                <Input
-                  placeholder="e.g., 6281234567890"
-                  value={newPhoneNumber}
-                  onChange={(e) => setNewPhoneNumber(e.target.value)}
-                  className="mt-1.5"
-                />
-              </div>
-            )}
+            <AnimatePresence initial={false}>
+              {authMethod === "pairing" && (
+                <motion.div {...revealMotion}>
+                  <TextField
+                    label="Phone Number"
+                    placeholder="e.g., 6281234567890"
+                    value={newPhoneNumber}
+                    onChange={(e) => setNewPhoneNumber(e.target.value)}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </TabsContent>
 
           {/* Bulk Queue Mode */}
           <TabsContent value="bulk" className="space-y-4 py-4">
-            <div className="rounded-2xl border border-outline-variant bg-secondary-container p-4 text-on-secondary-container">
+            <div className="bg-secondary-container text-on-secondary-container rounded-[var(--radius-md)] border border-outline-variant p-4">
               <div className="flex items-start gap-3">
-                <Layers className="mt-0.5 h-5 w-5" />
+                <span className="bg-on-secondary-container/12 grid size-9 shrink-0 place-items-center rounded-full">
+                  <Layers className="h-5 w-5" />
+                </span>
                 <div>
-                  <p className="text-sm font-medium">Continuous Mode</p>
-                  <p className="mt-1 text-xs opacity-80">
+                  <p className="md-title-small">Continuous Mode</p>
+                  <p className="md-body-small mt-1 opacity-80">
                     Accounts will be created one by one. After each scan or connection, a new
                     QR/Pairing code appears automatically.
                   </p>
@@ -220,64 +223,67 @@ export function AddAccountDialog() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Total Accounts</Label>
-                <Input
-                  type="number"
-                  placeholder="10"
-                  value={bulkCount}
-                  onChange={(e) => setBulkCount(e.target.value)}
-                  className="mt-1.5"
-                />
-              </div>
-              <div>
-                <Label>Account Prefix</Label>
-                <Input
-                  placeholder="warmer"
-                  value={bulkPrefix}
-                  onChange={(e) => setBulkPrefix(e.target.value)}
-                  className="mt-1.5"
-                />
-              </div>
+              <TextField
+                label="Total Accounts"
+                type="number"
+                placeholder="10"
+                value={bulkCount}
+                onChange={(e) => setBulkCount(e.target.value)}
+              />
+              <TextField
+                label="Account Prefix"
+                placeholder="warmer"
+                value={bulkPrefix}
+                onChange={(e) => setBulkPrefix(e.target.value)}
+              />
             </div>
 
             {authToggle}
 
-            {authMethod === "pairing" && (
-              <div className="rounded-2xl border border-outline-variant bg-warning-container p-3 text-on-warning-container">
-                <p className="text-xs">
-                  Pairing mode requires phone numbers. Use Excel Upload for bulk pairing codes.
-                </p>
-              </div>
-            )}
+            <AnimatePresence initial={false}>
+              {authMethod === "pairing" && (
+                <motion.div
+                  className="bg-warning-container text-on-warning-container rounded-[var(--radius-md)] border border-outline-variant p-3"
+                  {...revealMotion}
+                >
+                  <p className="md-body-small">
+                    Pairing mode requires phone numbers. Use Excel Upload for bulk pairing codes.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            {bulkCount && bulkPrefix && (
-              <div className="rounded-2xl bg-surface-container p-3">
-                <p className="mb-2 text-xs text-on-surface-variant">Preview Account IDs:</p>
-                <div className="flex flex-wrap gap-1">
-                  {Array.from({ length: Math.min(5, parseInt(bulkCount) || 0) }, (_, i) => (
-                    <Badge key={i} variant="outline" className="text-[10px]">
-                      {bulkPrefix}-{i + 1}
-                    </Badge>
-                  ))}
-                  {(parseInt(bulkCount) || 0) > 5 && (
-                    <Badge variant="outline" className="text-[10px] text-on-surface-variant">
-                      +{(parseInt(bulkCount) || 0) - 5} more
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            )}
+            <AnimatePresence initial={false}>
+              {bulkCount && bulkPrefix && (
+                <motion.div className="bg-surface-container rounded-[var(--radius-md)] p-3" {...revealMotion}>
+                  <p className="md-label-medium text-on-surface-variant mb-2">Preview Account IDs:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {Array.from({ length: Math.min(5, parseInt(bulkCount) || 0) }, (_, i) => (
+                      <Badge key={i} variant="outline">
+                        {bulkPrefix}-{i + 1}
+                      </Badge>
+                    ))}
+                    {(parseInt(bulkCount) || 0) > 5 && (
+                      <Badge variant="outline" className="text-on-surface-variant">
+                        +{(parseInt(bulkCount) || 0) - 5} more
+                      </Badge>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </TabsContent>
 
           {/* Excel Upload Mode */}
           <TabsContent value="excel" className="space-y-4 py-4">
-            <div className="rounded-2xl border border-outline-variant bg-success-container p-4 text-on-success-container">
+            <div className="bg-success-container text-on-success-container rounded-[var(--radius-md)] border border-outline-variant p-4">
               <div className="flex items-start gap-3">
-                <FileSpreadsheet className="mt-0.5 h-5 w-5" />
+                <span className="bg-on-success-container/12 grid size-9 shrink-0 place-items-center rounded-full">
+                  <FileSpreadsheet className="h-5 w-5" />
+                </span>
                 <div>
-                  <p className="text-sm font-medium">Excel Upload</p>
-                  <p className="mt-1 text-xs opacity-80">
+                  <p className="md-title-small">Excel Upload</p>
+                  <p className="md-body-small mt-1 opacity-80">
                     Upload an Excel file with account data. Columns: account_id, phone (optional),
                     method (qr/pairing)
                   </p>
@@ -307,52 +313,56 @@ export function AddAccountDialog() {
               </label>
             </div>
 
-            {excelUploadResult && (
-              <div className="rounded-2xl bg-surface-container p-3">
-                <div className="mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-success" />
-                  <span className="text-sm font-medium text-on-surface">
-                    {excelUploadResult.total} accounts parsed
-                  </span>
-                </div>
-                <div className="max-h-32 overflow-y-auto">
-                  <div className="flex flex-wrap gap-1">
-                    {excelUploadResult.accounts?.slice(0, 10).map((acc, i) => (
-                      <Badge key={i} variant="outline" className="text-[10px]">
-                        {acc.accountId}
-                      </Badge>
-                    ))}
-                    {excelUploadResult.total > 10 && (
-                      <Badge variant="outline" className="text-[10px] text-on-surface-variant">
-                        +{excelUploadResult.total - 10} more
-                      </Badge>
+            <AnimatePresence initial={false}>
+              {excelUploadResult && (
+                <motion.div className="bg-surface-container rounded-[var(--radius-md)] p-3" {...revealMotion}>
+                  <div className="mb-2 flex items-center gap-2">
+                    <CheckCircle className="text-success h-4 w-4" />
+                    <span className="md-title-small text-on-surface">
+                      {excelUploadResult.total} accounts parsed
+                    </span>
+                  </div>
+                  <div className="max-h-32 overflow-y-auto">
+                    <div className="flex flex-wrap gap-1">
+                      {excelUploadResult.accounts?.slice(0, 10).map((acc, i) => (
+                        <Badge key={i} variant="outline">
+                          {acc.accountId}
+                        </Badge>
+                      ))}
+                      {excelUploadResult.total > 10 && (
+                        <Badge variant="outline" className="text-on-surface-variant">
+                          +{excelUploadResult.total - 10} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence initial={false}>
+              {bulkQueueStatus && bulkQueueStatus.total > 0 && (
+                <motion.div className="space-y-2" {...revealMotion}>
+                  <div className="md-label-medium text-on-surface-variant flex items-center justify-between">
+                    <span>Queue Progress</span>
+                    <span className="tabular-nums">
+                      {bulkQueueStatus.completed}/{bulkQueueStatus.total}
+                    </span>
+                  </div>
+                  <Progress
+                    value={(bulkQueueStatus.completed / bulkQueueStatus.total) * 100}
+                    className="h-2"
+                  />
+                  <div className="md-label-medium flex gap-4">
+                    <span className="text-success">{bulkQueueStatus.completed} done</span>
+                    <span className="text-on-warning-container">{bulkQueueStatus.pending} pending</span>
+                    {bulkQueueStatus.failed > 0 && (
+                      <span className="text-danger">{bulkQueueStatus.failed} failed</span>
                     )}
                   </div>
-                </div>
-              </div>
-            )}
-
-            {bulkQueueStatus && bulkQueueStatus.total > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs text-on-surface-variant">
-                  <span>Queue Progress</span>
-                  <span>
-                    {bulkQueueStatus.completed}/{bulkQueueStatus.total}
-                  </span>
-                </div>
-                <Progress
-                  value={(bulkQueueStatus.completed / bulkQueueStatus.total) * 100}
-                  className="h-2"
-                />
-                <div className="flex gap-4 text-xs">
-                  <span className="text-success">{bulkQueueStatus.completed} done</span>
-                  <span className="text-warning">{bulkQueueStatus.pending} pending</span>
-                  {bulkQueueStatus.failed > 0 && (
-                    <span className="text-danger">{bulkQueueStatus.failed} failed</span>
-                  )}
-                </div>
-              </div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </TabsContent>
         </Tabs>
 
@@ -363,7 +373,7 @@ export function AddAccountDialog() {
           <Button onClick={handleAddAccount} disabled={isUploading}>
             {isUploading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <LoadingIndicator size={18} className="mr-2 text-on-primary" />
                 Processing...
               </>
             ) : addMode === "single" ? (

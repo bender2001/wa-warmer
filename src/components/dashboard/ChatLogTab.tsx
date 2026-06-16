@@ -1,12 +1,14 @@
 "use client";
 
 import { ArrowDownLeft, ArrowUpRight, Bot, Inbox, LogOut, MessageCircle, Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { listItem, spatial } from "@/lib/motion";
 import { useWarmer } from "@/hooks/useWarmer";
 import { cn } from "@/lib/utils";
 
@@ -27,8 +29,8 @@ export function ChatLogTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-on-surface">Chat Log</h2>
-          <p className="text-sm text-on-surface-variant">All message activity</p>
+          <h2 className="md-headline-small text-on-surface">Chat Log</h2>
+          <p className="md-body-medium text-on-surface-variant">All message activity</p>
         </div>
         <Button variant="outlined" size="sm" onClick={clearLogs}>
           <Trash2 className="h-4 w-4 mr-2" />
@@ -39,7 +41,7 @@ export function ChatLogTab() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Messages</CardTitle>
+            <CardTitle className="md-title-medium">Messages</CardTitle>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[500px]">
@@ -48,11 +50,17 @@ export function ChatLogTab() {
                   {chatMessages.map((msg) => {
                     const out = msg.direction === "outgoing";
                     return (
-                      <div
+                      <motion.div
                         key={msg.id}
+                        variants={listItem}
+                        initial="initial"
+                        animate="animate"
+                        transition={spatial.default}
                         className={cn(
-                          "flex gap-3 p-3 rounded-2xl",
-                          out ? "bg-surface-container ml-8" : "bg-success-container/40 mr-8"
+                          "relative flex gap-3 p-3 rounded-[var(--radius-md)]",
+                          out
+                            ? "bg-surface-container ml-8"
+                            : "bg-success-container/40 mr-8"
                         )}
                       >
                         <div
@@ -69,27 +77,27 @@ export function ChatLogTab() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-medium text-on-surface">{msg.accountId}</span>
+                            <span className="md-label-medium text-on-surface">{msg.accountId}</span>
                             {msg.isAutoResponse && (
-                              <Badge variant="secondary" className="text-[10px]">
+                              <Badge variant="secondary" className="md-label-small">
                                 <Bot className="h-2.5 w-2.5 mr-1" />
                                 Auto
                               </Badge>
                             )}
-                            <span className="text-[10px] text-on-surface-variant ml-auto">
+                            <span className="md-label-small text-on-surface-variant ml-auto">
                               {new Date(msg.timestamp).toLocaleTimeString()}
                             </span>
                           </div>
-                          <p className="text-sm text-on-surface-variant break-words">{msg.text}</p>
+                          <p className="md-body-medium text-on-surface-variant break-words">{msg.text}</p>
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full py-12">
                   <MessageCircle className="h-12 w-12 text-on-surface-variant/40 mb-4" />
-                  <p className="text-sm text-on-surface-variant">No messages yet</p>
+                  <p className="md-body-medium text-on-surface-variant">No messages yet</p>
                 </div>
               )}
             </ScrollArea>
@@ -99,7 +107,7 @@ export function ChatLogTab() {
         <div className="space-y-4">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Summary</CardTitle>
+              <CardTitle className="md-title-medium">Summary</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -107,9 +115,9 @@ export function ChatLogTab() {
                   <div key={label} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Icon className={cn("h-4 w-4", accent)} />
-                      <span className="text-sm text-on-surface-variant">{label}</span>
+                      <span className="md-body-medium text-on-surface-variant">{label}</span>
                     </div>
-                    <span className="font-semibold text-on-surface tabular-nums">{value}</span>
+                    <span className="md-title-large text-on-surface tabular-nums">{value}</span>
                   </div>
                 ))}
               </div>
@@ -118,7 +126,7 @@ export function ChatLogTab() {
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Activity Log</CardTitle>
+              <CardTitle className="md-title-medium">Activity Log</CardTitle>
             </CardHeader>
             <CardContent>
               <ActivityFeed logs={logs} limit={50} height="h-72" />

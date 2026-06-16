@@ -84,18 +84,254 @@
   --color-danger-container: var(--md-danger-container);
   --color-on-danger-container: var(--md-on-danger-container);
 
-  /* M3 Expressive shape scale */
-  --radius-xs: 0.5rem;
-  --radius-sm: 0.75rem;
-  --radius-md: 1rem;
-  --radius-lg: 1.5rem;
+  /* M3 fixed roles (identical in light & dark) */
+  --color-primary-fixed: var(--md-primary-fixed);
+  --color-primary-fixed-dim: var(--md-primary-fixed-dim);
+  --color-on-primary-fixed: var(--md-on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--md-on-primary-fixed-variant);
+  --color-secondary-fixed: var(--md-secondary-fixed);
+  --color-secondary-fixed-dim: var(--md-secondary-fixed-dim);
+  --color-on-secondary-fixed: var(--md-on-secondary-fixed);
+  --color-on-secondary-fixed-variant: var(--md-on-secondary-fixed-variant);
+  --color-tertiary-fixed: var(--md-tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--md-tertiary-fixed-dim);
+  --color-on-tertiary-fixed: var(--md-on-tertiary-fixed);
+  --color-on-tertiary-fixed-variant: var(--md-on-tertiary-fixed-variant);
+
+  /* M3 inverse + tint/scrim/shadow */
+  --color-inverse-surface: var(--md-inverse-surface);
+  --color-inverse-on-surface: var(--md-inverse-on-surface);
+  --color-inverse-primary: var(--md-inverse-primary);
+  --color-surface-tint: var(--md-surface-tint);
+  --color-scrim: var(--md-scrim);
+  --color-shadow: var(--md-shadow);
+
+  /* M3 Expressive shape scale — TRUE dp values
+     none 0 · xs 4 · sm 8 · md 12 · lg 16 · lg-increased 20
+     · xl 28 · xl-increased 32 · full=pill */
+  --radius-none: 0;
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-lg-increased: 1.25rem;
   --radius-xl: 1.75rem;
-  --radius-2xl: 2.25rem;
-  --radius-3xl: 2.75rem;
+  --radius-xl-increased: 2rem;
+  --radius-full: 9999px;
+  /* keep leftover rounded-2xl/3xl sane (16/24px, not huge) */
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+}
+
+/* ============================================================
+   M3 ELEVATION — box-shadow tokens (levels 0–5).
+   ============================================================ */
+@utility md-elevation-0 {
+  box-shadow: none;
+}
+@utility md-elevation-1 {
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+}
+@utility md-elevation-2 {
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+}
+@utility md-elevation-3 {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+}
+@utility md-elevation-4 {
+  box-shadow: 0 2px 3px 0 rgb(0 0 0 / 0.3), 0 6px 10px 4px rgb(0 0 0 / 0.15);
+}
+@utility md-elevation-5 {
+  box-shadow: 0 4px 4px 0 rgb(0 0 0 / 0.3), 0 8px 12px 6px rgb(0 0 0 / 0.15);
+}
+
+/* ============================================================
+   M3 TYPE SCALE — each role sets size/line-height/weight/tracking.
+   Every role also has an -emphasized variant (heavier weight only).
+   ============================================================ */
+@utility md-display-large {
+  font-size: 3.5625rem;
+  line-height: 4rem;
+  font-weight: 400;
+  letter-spacing: -0.015625em;
+}
+@utility md-display-large-emphasized {
+  font-size: 3.5625rem;
+  line-height: 4rem;
+  font-weight: 600;
+  letter-spacing: -0.015625em;
+}
+@utility md-display-medium {
+  font-size: 2.8125rem;
+  line-height: 3.25rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@utility md-display-medium-emphasized {
+  font-size: 2.8125rem;
+  line-height: 3.25rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+@utility md-display-small {
+  font-size: 2.25rem;
+  line-height: 2.75rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@utility md-display-small-emphasized {
+  font-size: 2.25rem;
+  line-height: 2.75rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+@utility md-headline-large {
+  font-size: 2rem;
+  line-height: 2.5rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@utility md-headline-large-emphasized {
+  font-size: 2rem;
+  line-height: 2.5rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+@utility md-headline-medium {
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@utility md-headline-medium-emphasized {
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+@utility md-headline-small {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@utility md-headline-small-emphasized {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+@utility md-title-large {
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@utility md-title-large-emphasized {
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+@utility md-title-medium {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  letter-spacing: 0.009375em;
+}
+@utility md-title-medium-emphasized {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.009375em;
+}
+@utility md-title-small {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.00625em;
+}
+@utility md-title-small-emphasized {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.00625em;
+}
+@utility md-body-large {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.03125em;
+}
+@utility md-body-large-emphasized {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  letter-spacing: 0.03125em;
+}
+@utility md-body-medium {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 400;
+  letter-spacing: 0.015625em;
+}
+@utility md-body-medium-emphasized {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.015625em;
+}
+@utility md-body-small {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+}
+@utility md-body-small-emphasized {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+@utility md-label-large {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.00625em;
+}
+@utility md-label-large-emphasized {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.00625em;
+}
+@utility md-label-medium {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.03125em;
+}
+@utility md-label-medium-emphasized {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.03125em;
+}
+@utility md-label-small {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.03125em;
+}
+@utility md-label-small-emphasized {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.03125em;
 }
 
 :root {
-  --radius: 1rem;
+  --radius: 0.75rem;
 
   /* ---- M3 primary: WhatsApp-adjacent expressive green (h≈150) ---- */
   --md-primary: oklch(0.58 0.15 150);
@@ -150,6 +386,28 @@
   --md-on-danger: oklch(0.99 0.01 27);
   --md-danger-container: oklch(0.92 0.07 27);
   --md-on-danger-container: oklch(0.32 0.13 27);
+
+  /* ---- M3 fixed roles (same value in :root and .dark) ---- */
+  --md-primary-fixed: oklch(0.92 0.07 150);
+  --md-primary-fixed-dim: oklch(0.86 0.09 150);
+  --md-on-primary-fixed: oklch(0.30 0.09 150);
+  --md-on-primary-fixed-variant: oklch(0.40 0.10 150);
+  --md-secondary-fixed: oklch(0.91 0.05 185);
+  --md-secondary-fixed-dim: oklch(0.85 0.06 185);
+  --md-on-secondary-fixed: oklch(0.30 0.06 185);
+  --md-on-secondary-fixed-variant: oklch(0.40 0.07 185);
+  --md-tertiary-fixed: oklch(0.92 0.07 300);
+  --md-tertiary-fixed-dim: oklch(0.86 0.10 300);
+  --md-on-tertiary-fixed: oklch(0.32 0.11 300);
+  --md-on-tertiary-fixed-variant: oklch(0.40 0.13 300);
+
+  /* ---- M3 inverse + tint / scrim / shadow ---- */
+  --md-inverse-surface: oklch(0.30 0.008 150);
+  --md-inverse-on-surface: oklch(0.95 0.004 150);
+  --md-inverse-primary: oklch(0.82 0.14 150);
+  --md-surface-tint: var(--md-primary);
+  --md-scrim: oklch(0 0 0);
+  --md-shadow: oklch(0 0 0);
 
   /* charts (expressive multi-hue) */
   --chart-1: oklch(0.58 0.15 150);
@@ -227,6 +485,28 @@
   --md-danger-container: oklch(0.42 0.14 25);
   --md-on-danger-container: oklch(0.92 0.07 22);
 
+  /* ---- M3 fixed roles: IDENTICAL to :root (light container tones) ---- */
+  --md-primary-fixed: oklch(0.92 0.07 150);
+  --md-primary-fixed-dim: oklch(0.86 0.09 150);
+  --md-on-primary-fixed: oklch(0.30 0.09 150);
+  --md-on-primary-fixed-variant: oklch(0.40 0.10 150);
+  --md-secondary-fixed: oklch(0.91 0.05 185);
+  --md-secondary-fixed-dim: oklch(0.85 0.06 185);
+  --md-on-secondary-fixed: oklch(0.30 0.06 185);
+  --md-on-secondary-fixed-variant: oklch(0.40 0.07 185);
+  --md-tertiary-fixed: oklch(0.92 0.07 300);
+  --md-tertiary-fixed-dim: oklch(0.86 0.10 300);
+  --md-on-tertiary-fixed: oklch(0.32 0.11 300);
+  --md-on-tertiary-fixed-variant: oklch(0.40 0.13 300);
+
+  /* ---- M3 inverse (inverted vs light) + tint / scrim / shadow ---- */
+  --md-inverse-surface: oklch(0.95 0.004 150);
+  --md-inverse-on-surface: oklch(0.30 0.008 150);
+  --md-inverse-primary: oklch(0.58 0.15 150);
+  --md-surface-tint: var(--md-primary);
+  --md-scrim: oklch(0 0 0);
+  --md-shadow: oklch(0 0 0);
+
   --chart-1: oklch(0.82 0.14 150);
   --chart-2: oklch(0.80 0.07 185);
   --chart-3: oklch(0.82 0.13 300);
@@ -245,7 +525,7 @@
 
 /* ============================================================
    M3 state layers — a translucent overlay of a role color at
-   hover 8% / focus 10% / press 12%. Opt in via a `state-layer-*`
+   hover 8% / focus 12% / press 12% / dragged 16%. Opt in via a `state-layer-*`
    class on a `relative` element; content should sit above ::after.
    ============================================================ */
 @layer components {
@@ -266,25 +546,67 @@
     opacity: 0.08;
   }
   [class*="state-layer-"]:focus-visible::after {
-    opacity: 0.1;
+    opacity: 0.12;
   }
   [class*="state-layer-"]:active::after {
     opacity: 0.12;
   }
+  [class*="state-layer-"][data-dragging="true"]::after {
+    opacity: 0.16;
+  }
 
+  .state-layer-on-surface::after {
+    background: var(--md-on-surface);
+  }
+  .state-layer-on-surface-variant::after {
+    background: var(--md-on-surface-variant);
+  }
   .state-layer-primary::after {
     background: var(--md-primary);
   }
   .state-layer-on-primary::after {
     background: var(--md-on-primary);
   }
-  .state-layer-on-surface::after {
-    background: var(--md-on-surface);
+  .state-layer-primary-container::after {
+    background: var(--md-primary-container);
+  }
+  .state-layer-secondary::after {
+    background: var(--md-secondary);
+  }
+  .state-layer-secondary-container::after {
+    background: var(--md-secondary-container);
   }
   .state-layer-on-secondary-container::after {
     background: var(--md-on-secondary-container);
   }
+  .state-layer-tertiary::after {
+    background: var(--md-tertiary);
+  }
+  .state-layer-on-tertiary::after {
+    background: var(--md-on-tertiary);
+  }
+  .state-layer-error::after {
+    background: var(--md-error);
+  }
   .state-layer-on-error::after {
     background: var(--md-on-error);
+  }
+  .state-layer-success::after {
+    background: var(--md-success);
+  }
+  .state-layer-warning::after {
+    background: var(--md-warning);
+  }
+  .state-layer-danger::after {
+    background: var(--md-danger);
+  }
+  .state-layer-on-success-container::after {
+    background: var(--md-on-success-container);
+  }
+  .state-layer-on-warning-container::after {
+    background: var(--md-on-warning-container);
+  }
+  .state-layer-on-danger-container::after {
+    background: var(--md-on-danger-container);
   }
 }

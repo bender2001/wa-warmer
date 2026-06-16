@@ -3,15 +3,15 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-// Material 3 Expressive cards: large radius, surface-container tones, elevation.
+// Material 3 cards: medium 12dp corner, surface-container tones, elevation per variant.
 const cardVariants = cva(
-  "flex flex-col gap-6 rounded-[var(--radius-lg)] py-6 text-on-surface transition-shadow",
+  "flex flex-col gap-6 rounded-[var(--radius-md)] py-6 text-on-surface transition-shadow",
   {
     variants: {
       variant: {
-        elevated: "bg-surface-container-low shadow-sm hover:shadow-md",
-        filled: "bg-surface-container-highest",
-        outlined: "bg-surface border border-outline-variant",
+        elevated: "bg-surface-container-low md-elevation-1 hover:md-elevation-2",
+        filled: "bg-surface-container-highest md-elevation-0",
+        outlined: "bg-surface border border-outline-variant md-elevation-0",
       },
     },
     defaultVariants: {
@@ -51,7 +51,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
-      className={cn("leading-none font-semibold", className)}
+      className={cn("md-title-medium", className)}
       {...props}
     />
   )
@@ -61,7 +61,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("text-on-surface-variant text-sm", className)}
+      className={cn("md-body-medium text-on-surface-variant", className)}
       {...props}
     />
   )
